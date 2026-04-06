@@ -4,43 +4,41 @@ Uma cuidadora de idosos atua de forma autônoma, atendendo diferentes pacientes 
 
 ## Pontos identificados 
 
-A cuidadora precisa armazenar o registro de informações sobre o paciente. Ela armazena o estado de saude, nivel de autonomia e historico de acompamento. 
+A cuidadora precisa armazenar o registro de informações sobre o paciente. Ela armazena o estado de saúde, nível de autonomia e histórico de acompanhamento.
 
 Pensando na estrutura de banco de dados teriamos as seguinte entidade:
 
-paciente [id(serial), nome(varchar), cpf(varchar), autonomia(enum), historico(json ou text)]
+* paciente [id(serial), nome(varchar), cpf(varchar)]
+
+* historico_evolucao [id(serial),paciente_id (Foreign Key), data (date), nivel_autonomia (text - estado do paciente naquele dia), observacoes (text)]
 
 ### Justificativa:
 
-* id: Acredito que o id pode ser gerado de forma incremental como int para esse cenario, pois se tratando de um atendimento autonomo, a cuidadora não lidará com milhoes de pacientes.
-* nome: Um atributo padrão para identificar os pacientes. 
-* cpf: Um atributo importante para identificar de forma unica, visto que podem existir paciente com nomes parecidos. 
-* autonomia: A ideia desse atributo seria definir de um dado constante para cada usuario. Por exemplo, eu poderia definir valores como [AUTONOMO, PRECISA_DE_ACOMPANHENTE, SITUACAO_DE_CAMA], e dessa forma a situação do paciente poderia mudar dependendo do resultado da consulta. Então um paciente que está apresentando evolução no quadro de saude teria UPDATE em seu registro a cada visita -> SITUACAO_DE_CAMA -> PRECISA_DE_ACOMPANHENTE -> AUTONOMO.
-* historico: dentro desse atributo teriamos anotações importantes sobre o quadro do paciente, servindo como uma "ficha medica" para a cuidadora ter um controle sobre os atendimentos realizados atraves de uma estrutura de objetos aninhados. Dentro de cada objeto, o corpo json poderia armazenar dados chave importantes como data:12/12/1234 e autonomia:SITUACAO_DE_CAMA correspondente aquele dia. Ficando dessa forma:
+***paciente***
 
-```json
-{  "historico_atendimentos": [
-    {
-      "data": "2023-10-01",
-      "autonomia": "SITUACAO_DE_CAMA",
-      "observacoes": "Paciente apresentou febre durante a noite, administrado medicamento conforme prescricao."
-    },
-    {
-      "data": "2023-10-15",
-      "autonomia": "PRECISA_DE_ACOMPANHENTE",
-      "observacoes": "Melhora no quadro clinico, já consegue se sentar com auxilio."
-    },
-    {
-      "data": "2023-11-01",
-      "autonomia": "AUTONOMO",
-      "observacoes": "Paciente recuperou mobilidade total, segue em observação preventiva."
-    }
-  ]
+`id:`
+Acredito que o ID pode ser gerado de forma incremental (integer) para este cenário, pois, tratando-se de um atendimento autônomo, a cuidadora não lidará com milhões de pacientes.
 
+`nome` Um atributo padrão para identificar os pacientes. 
 
-}
-```
+`cpf:` 
+Um atributo importante para identificar de forma unica, visto que podem existir paciente com nomes parecidos. 
 
+***historico_evolucao***
+`id:`
+Identificador único (Primary Key) para cada registro de visita ou atendimento. Ele garante a integridade e a rastreabilidade de cada interação realizada pela cuidadora.
+
+`paciente_id:`
+Chave estrangeira (Foreign Key) que vincula o registro ao idoso específico. Esse relacionamento é o que permite ao sistema "organizar de forma que permita uma visão clara e rápida" de todo o passado clínico de um único paciente.
+
+`data:`
+Atributo fundamental para resolver o problema de "reconstruir o que foi feito nos dias anteriores". Com a data indexada, a busca por informações antigas deixa de ser manual e passa a ser instantânea.
+
+`nivel_autonomia:`
+Diferente do campo na tabela de pacientes (que mostra o estado atual), este campo registra como o paciente estava naquele dia específico. É este dado que permite gerar gráficos ou relatórios para "entender a evolução de um paciente ao longo do tempo" conforme solicitado pelos familiares.
+
+`observacoes:`
+Campo de texto destinado a centralizar o que antes ficava disperso em "cadernos", "mensagens" ou apenas na "memória". Ele atua como o diário de bordo técnico, garantindo que nenhum detalhe do acompanhamento se perca com o aumento do número de atendimentos.
 
 
 
