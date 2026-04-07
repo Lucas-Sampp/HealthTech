@@ -1,14 +1,12 @@
 const express = require('express');
-
 const app = express();
 
-app.get('/', (req, res) => {
-    res.send('testando');
-});
+app.use(express.json());
 
-app.post('/teste/:num', (req, res) => {
-    res.send('recebir esse valor', req.params.num);
-});
+const route= require('./routes/routes');
+
+app.use('/api', route);
+
 
 app.listen(3000, () => {
     console.log('servidor rodando')
